@@ -179,8 +179,8 @@ public class TusUploader {
         int bytesToRead = Math.min(getChunkSize(), bytesRemainingForRequest);
 
         int bytesRead = input.read(buffer, bytesToRead);
-        System.out.println("uploadChuckTesting: " + ""+buffer);
         System.out.println("uploadChuckTesting: " + ""+bytesRead);
+        System.out.println(buffer.length);
         if(bytesRead == -1) {
             // No bytes were read since the input stream is empty
             return -1;
