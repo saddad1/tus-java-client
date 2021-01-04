@@ -3,6 +3,12 @@ package io.tus.java.example;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import io.tus.java.client.ProtocolException;
 import io.tus.java.client.TusClient;
@@ -71,7 +77,7 @@ public class Main {
                         double progress = (double) bytesUploaded / totalBytes * 100;
 
                         System.out.printf("Upload at %06.2f%%.\n", progress);
-                    } while(uploader.uploadChunk() > -1);
+                    } while(checkBytes(uploader));
 
                     // Allow the HTTP connection to be closed and cleaned up
                     uploader.finish();
@@ -85,5 +91,21 @@ public class Main {
             e.printStackTrace();
         }
 
+    }
+
+    public static boolean checkBytes(TusUploader uploader){
+        try {
+            int val =  uploader.uploadChunk();
+            if(val > -1){
+                return true;
+            }else {
+                return false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
