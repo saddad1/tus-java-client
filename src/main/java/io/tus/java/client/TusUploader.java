@@ -190,8 +190,8 @@ public class TusUploader {
         int bytesRead = 0;
         SecretKey sec = new SecretKeySpec("DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes(), "AES");
         try {
-            buffer = encryptData(buffer, sec);
-            bytesRead = input.read(buffer, bytesToRead);
+            byte[] encryptedBuffer = encryptData(buffer, sec);
+            bytesRead = input.read(encryptedBuffer, bytesToRead);
             if (bytesRead == -1) {
                 // No bytes were read since the input stream is empty
                 return -1;
@@ -199,7 +199,7 @@ public class TusUploader {
             // Do not write the entire buffer to the stream since the array will
             // be filled up with 0x00s if the number of read bytes is lower then
             // the chunk's size.
-            output.write(buffer, 0, bytesRead);
+            output.write(encryptedBuffer, 0, bytesRead);
             output.flush();
 
             offset += bytesRead;
@@ -232,6 +232,7 @@ public class TusUploader {
         cipher = Cipher.getInstance("AES/CBC/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, secret);
         byte[] cipherText = cipher.doFinal(data);
+        byte[] iv = cipher.getIV();
         return cipherText;
     }
 
