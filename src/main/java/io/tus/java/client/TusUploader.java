@@ -2,9 +2,21 @@ package io.tus.java.client;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.Buffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidParameterSpecException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * This class is used for doing the actual upload of the files. Instances are returned by
@@ -173,19 +185,18 @@ public class TusUploader {
      * @throws IOException  Thrown if an exception occurs while reading from the source or writing
      *                      to the HTTP request.
      */
-    public int uploadChunk() throws IOException, ProtocolException {
+    public int uploadChunk() throws IOException, ProtocolException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
         openConnection();
 
         int bytesToRead = Math.min(getChunkSize(), bytesRemainingForRequest);
+        SecretKey sec =  new SecretKeySpec("DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes(), "AES");
+        buffer = encryptData(buffer,sec);
 
         int bytesRead = input.read(buffer, bytesToRead);
-        System.out.println("uploadChuckTesting: " + ""+bytesRead);
-        System.out.println(buffer.length);
         if(bytesRead == -1) {
             // No bytes were read since the input stream is empty
             return -1;
         }
-        
         // Do not write the entire buffer to the stream since the array will
         // be filled up with 0x00s if the number of read bytes is lower then
         // the chunk's size.
@@ -201,6 +212,21 @@ public class TusUploader {
 
         return bytesRead;
     }
+
+    /*
+    * Encrypt Chuck
+    */
+    public static byte[] encryptData(byte[] data, SecretKey secret)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException
+    {
+        /* Encrypt the message. */
+        Cipher cipher = null;
+        cipher = Cipher.getInstance("AES/CBC/NoPadding");
+        cipher.init(Cipher.ENCRYPT_MODE,secret);
+        byte[] cipherText = cipher.doFinal(data);
+        return cipherText;
+    }
+
 
     /**
      * Upload a part of the file by read a chunks specified size from the InputStream and writing
