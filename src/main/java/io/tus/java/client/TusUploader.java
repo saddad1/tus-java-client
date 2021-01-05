@@ -234,7 +234,7 @@ public class TusUploader {
             throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
         /* Encrypt the message. */
         Cipher cipher = null;
-        cipher = Cipher.getInstance("AES/CBC/NoPadding");
+        cipher = Cipher.getInstance("AES_256/CBC/NoPadding");
         try {
             cipher.init(Cipher.ENCRYPT_MODE, secret,new IvParameterSpec("1234567890123456".getBytes(StandardCharsets.UTF_8)));
         } catch (InvalidAlgorithmParameterException e) {
