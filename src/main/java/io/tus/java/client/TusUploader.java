@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.Buffer;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidParameterSpecException;
@@ -18,6 +19,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -190,7 +192,7 @@ public class TusUploader {
 
         int bytesToRead = Math.min(getChunkSize(), bytesRemainingForRequest);
         int bytesRead = 0;
-        SecretKey sec = new SecretKeySpec("DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes(), "AES");
+        SecretKey sec = new SecretKeySpec("DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes(StandardCharsets.UTF_8), "AES");
         try {
             bytesRead = input.read(buffer, bytesToRead);
             if (bytesRead == -1) {
@@ -233,9 +235,14 @@ public class TusUploader {
         /* Encrypt the message. */
         Cipher cipher = null;
         cipher = Cipher.getInstance("AES/CBC/NoPadding");
-        cipher.init(Cipher.ENCRYPT_MODE, secret);
+        try {
+            cipher.init(Cipher.ENCRYPT_MODE, secret,new IvParameterSpec("1234567890123456".getBytes(StandardCharsets.UTF_8)));
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        }
         byte[] cipherText = cipher.doFinal(data);
         byte[] iv = cipher.getIV();
+
         return cipherText;
     }
 
