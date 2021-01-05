@@ -192,8 +192,7 @@ public class TusUploader {
         int bytesRead = 0;
         SecretKey sec = new SecretKeySpec("DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes(), "AES");
         try {
-            byte[] encryptedBuffer = encryptData(buffer, sec);
-            bytesRead = input.read(encryptedBuffer, bytesToRead);
+            bytesRead = input.read(buffer, bytesToRead);
             if (bytesRead == -1) {
                 // No bytes were read since the input stream is empty
                 return -1;
@@ -201,6 +200,8 @@ public class TusUploader {
             // Do not write the entire buffer to the stream since the array will
             // be filled up with 0x00s if the number of read bytes is lower then
             // the chunk's size.
+
+            byte[] encryptedBuffer = encryptData(buffer, sec);
             output.write(encryptedBuffer, 0, bytesRead);
             output.flush();
 
