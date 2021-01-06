@@ -19,6 +19,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -236,7 +237,8 @@ public class TusUploader {
         Cipher cipher = null;
         cipher = Cipher.getInstance("AES_256/GCM/NoPadding");
         try {
-            cipher.init(Cipher.ENCRYPT_MODE, secret,new IvParameterSpec("1234567890123456".getBytes(StandardCharsets.UTF_8)));
+            GCMParameterSpec spec = new GCMParameterSpec(128,new IvParameterSpec("1234567890123456".getBytes(StandardCharsets.UTF_8)).getIV());
+            cipher.init(Cipher.ENCRYPT_MODE, secret, spec);
         } catch (InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
