@@ -242,7 +242,7 @@ public class TusUploader {
         } catch (InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
-        byte[] cipherText = cipher.doFinal(data);
+        byte[] cipherText = cipher.update(data);
         byte[] iv = cipher.getIV();
 
         return cipherText;
