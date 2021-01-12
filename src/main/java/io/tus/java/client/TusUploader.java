@@ -14,6 +14,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidParameterSpecException;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
@@ -52,6 +53,9 @@ public class TusUploader {
     private HttpURLConnection connection;
     private OutputStream output;
 
+    public static final int AES_KEY_SIZE = 256;
+    public static final int GCM_IV_LENGTH = 12;
+    public static final int GCM_TAG_LENGTH = 16;
     /**
      * Begin a new upload request by opening a PATCH request to specified upload URL. After this
      * method returns a connection will be ready and you can upload chunks of the file.
@@ -237,27 +241,52 @@ public class TusUploader {
     public static byte[] encryptData(byte[] data, SecretKey secret)
             throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
         /* Encrypt the message. */
-        byte[] iv = new byte[12];
-        (new SecureRandom()).nextBytes(iv);
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(AES_KEY_SIZE);
 
-        Cipher cipher = Cipher.getInstance("AES_256/GCM/NoPadding");
-        GCMParameterSpec ivSpec = new GCMParameterSpec(12 * Byte.SIZE, iv);
+        // Generate Key
+        SecretKey key = keyGenerator.generateKey();
+        byte[] IV = new byte[GCM_IV_LENGTH];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(IV);
+
+        byte[] encoded = key.getEncoded();
+        String output = Base64.getEncoder().withoutPadding().encodeToString(encoded);
+        System.out.println("Keep it secret, keep it safe! " + output);
+
+        String ivoutput = Base64.getEncoder().withoutPadding().encodeToString(IV);
+        System.out.println("Keep ivoutput secret, keep it safe! " + ivoutput);
+
+        byte[] cipherText = new byte[0];
         try {
-            cipher.init(Cipher.ENCRYPT_MODE, secret, ivSpec);
-        } catch (InvalidAlgorithmParameterException e) {
+            cipherText = encrypt(data, key, IV);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        byte[] ciphertext = cipher.doFinal(data);
-        byte[] encrypted = new byte[iv.length + ciphertext.length];
-        System.arraycopy(iv, 0, encrypted, 0, iv.length);
-        System.arraycopy(ciphertext, 0, encrypted, iv.length, ciphertext.length);
+        byte[] tagVal = Arrays.copyOfRange(cipherText, cipherText.length - (128 / Byte.SIZE), cipherText.length);
 
-//        String encoded = Base64.getEncoder().encodeToString(encrypted);
-
-        return encrypted;
+        System.out.println("Encrypted Text : " + Base64.getEncoder().encodeToString(cipherText));
+        System.out.println("Tag Text : " + Base64.getEncoder().encodeToString(tagVal));
+        return cipherText;
     }
 
+    public static byte[] encrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception
+    {
+        // Get Cipher Instance
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+        // Create SecretKeySpec
+        SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
+
+        // Create GCMParameterSpec
+        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, IV);
+
+        // Initialize Cipher for ENCRYPT_MODE
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmParameterSpec);
+
+        return cipher.doFinal(plaintext);​
+    }
 
     /**
      * Upload a part of the file by read a chunks specified size from the InputStream and writing
