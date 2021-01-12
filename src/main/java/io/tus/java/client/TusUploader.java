@@ -53,9 +53,14 @@ public class TusUploader {
     private HttpURLConnection connection;
     private OutputStream output;
 
+    //encrytion varaibles
     public static final int AES_KEY_SIZE = 256;
     public static final int GCM_IV_LENGTH = 12;
     public static final int GCM_TAG_LENGTH = 16;
+
+    private static SecretKey key;
+    private static byte[] IV =new byte[GCM_IV_LENGTH];
+    KeyGenerator keyGenerator = null;
     /**
      * Begin a new upload request by opening a PATCH request to specified upload URL. After this
      * method returns a connection will be ready and you can upload chunks of the file.
@@ -76,6 +81,19 @@ public class TusUploader {
         input.seekTo(offset);
 
         setChunkSize(5 * 1024 * 1024);
+        /* Encrypt the message. */
+        try {
+            keyGenerator = KeyGenerator.getInstance("AES");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        keyGenerator.init(AES_KEY_SIZE);
+
+        // Generate Key
+        key = keyGenerator.generateKey();
+
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(IV);
     }
 
     private void openConnection() throws IOException, ProtocolException {
@@ -240,15 +258,6 @@ public class TusUploader {
      */
     public static byte[] encryptData(byte[] data, SecretKey secret)
             throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-        /* Encrypt the message. */
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(AES_KEY_SIZE);
-
-        // Generate Key
-        SecretKey key = keyGenerator.generateKey();
-        byte[] IV = new byte[GCM_IV_LENGTH];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(IV);
 
         byte[] encoded = key.getEncoded();
         String output = Base64.getEncoder().withoutPadding().encodeToString(encoded);
@@ -271,8 +280,7 @@ public class TusUploader {
         return cipherText;
     }
 
-    public static byte[] encrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception
-    {
+    public static byte[] encrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception {
         // Get Cipher Instance
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
