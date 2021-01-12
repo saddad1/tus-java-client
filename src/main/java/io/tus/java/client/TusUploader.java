@@ -241,8 +241,6 @@ public class TusUploader {
         int AES_KEY_SIZE = 256;
         int GCM_IV_LENGTH = 12;
         int GCM_TAG_LENGTH = 16;
-        KeyGenerator keyGenerator = null;
-        SecretKey key = keyGenerator.generateKey();
         byte[] IV = new byte[GCM_IV_LENGTH];
         SecureRandom random = new SecureRandom();
         random.nextBytes(IV);
