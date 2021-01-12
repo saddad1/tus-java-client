@@ -14,6 +14,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidParameterSpecException;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -236,41 +237,25 @@ public class TusUploader {
     public static byte[] encryptData(byte[] data, SecretKey secret)
             throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
         /* Encrypt the message. */
+        byte[] iv = new byte[12];
+        (new SecureRandom()).nextBytes(iv);
 
-        Cipher cipher = null;
-        int AES_KEY_SIZE = 256;
-        int GCM_IV_LENGTH = 12;
-        int GCM_TAG_LENGTH = 16;
-        byte[] IV = new byte[GCM_IV_LENGTH];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(IV);
-
-        // Create GCMParameterSpec
-        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(16 * 8, IV);
-        // Initialize Cipher for ENCRYPT_MODE
-        cipher = Cipher.getInstance("AES_256/GCM/NoPadding");
+        Cipher cipher = Cipher.getInstance("AES_256/GCM/NoPadding");
+        GCMParameterSpec ivSpec = new GCMParameterSpec(12 * Byte.SIZE, iv);
         try {
-            cipher.init(Cipher.ENCRYPT_MODE, secret, gcmParameterSpec);
+            cipher.init(Cipher.ENCRYPT_MODE, secret, ivSpec);
         } catch (InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
-        // Perform Encryption
-        byte[] cipherText = cipher.doFinal(data);
 
-        return cipherText;
+        byte[] ciphertext = cipher.doFinal(data);
+        byte[] encrypted = new byte[iv.length + ciphertext.length];
+        System.arraycopy(iv, 0, encrypted, 0, iv.length);
+        System.arraycopy(ciphertext, 0, encrypted, iv.length, ciphertext.length);
 
-//        Cipher cipher = null;
-//        cipher = Cipher.getInstance("AES_256/GCM/NoPadding");
-//        try {
-//            GCMParameterSpec spec = new GCMParameterSpec(128,new IvParameterSpec("123456789012".getBytes(StandardCharsets.UTF_8)).getIV());
-//            cipher.init(Cipher.ENCRYPT_MODE, secret, spec);
-//        } catch (InvalidAlgorithmParameterException e) {
-//            e.printStackTrace();
-//        }
-//        byte[] cipherText = cipher.doFinal(data);
-//        byte[] iv = cipher.getIV();
-//
-//        return cipherText;
+//        String encoded = Base64.getEncoder().encodeToString(encrypted);
+
+        return encrypted;
     }
 
 
