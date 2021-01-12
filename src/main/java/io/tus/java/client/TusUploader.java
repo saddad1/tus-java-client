@@ -59,7 +59,7 @@ public class TusUploader {
     public static final int GCM_TAG_LENGTH = 16;
 
     private static SecretKey key;
-    private static byte[] IV =new byte[GCM_IV_LENGTH];
+    private static final byte[] IV =new byte[GCM_IV_LENGTH];
     KeyGenerator keyGenerator = null;
     /**
      * Begin a new upload request by opening a PATCH request to specified upload URL. After this
@@ -82,6 +82,14 @@ public class TusUploader {
 
         setChunkSize(5 * 1024 * 1024);
         /* Encrypt the message. */
+    }
+
+    private void openConnection() throws IOException, ProtocolException {
+        // Only open a connection, if we have none open.
+        if (connection != null) {
+            return;
+        }
+
         try {
             keyGenerator = KeyGenerator.getInstance("AES");
         } catch (NoSuchAlgorithmException e) {
@@ -94,13 +102,6 @@ public class TusUploader {
 
         SecureRandom random = new SecureRandom();
         random.nextBytes(IV);
-    }
-
-    private void openConnection() throws IOException, ProtocolException {
-        // Only open a connection, if we have none open.
-        if (connection != null) {
-            return;
-        }
 
         bytesRemainingForRequest = requestPayloadSize;
         input.mark(requestPayloadSize);
