@@ -60,7 +60,7 @@ public class TusUploader {
     public static final int GCM_TAG_LENGTH = 16;
 
     private static SecretKey key;
-    private static final byte[] IV = "123456789012".getBytes();
+    private static final byte[] IV = "1234567890123456".getBytes();
     KeyGenerator keyGenerator = null;
 
     /**
