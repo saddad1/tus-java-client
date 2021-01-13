@@ -55,12 +55,12 @@ public class TusUploader {
     private OutputStream output;
 
     //encrytion varaibles
-    public static final int AES_KEY_SIZE = 128;
+    public static final int AES_KEY_SIZE = 256;
     public static final int GCM_IV_LENGTH = 12;
     public static final int GCM_TAG_LENGTH = 16;
 
     private static SecretKey key;
-    private static final byte[] IV = new byte[GCM_IV_LENGTH];
+    private static final byte[] IV = "123456789012".getBytes();
     KeyGenerator keyGenerator = null;
 
     /**
@@ -102,8 +102,8 @@ public class TusUploader {
         // Generate Key
         key = keyGenerator.generateKey();
 
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(IV);
+//        SecureRandom random = new SecureRandom();
+//        random.nextBytes(IV);
 
         bytesRemainingForRequest = requestPayloadSize;
         input.mark(requestPayloadSize);
@@ -221,7 +221,7 @@ public class TusUploader {
 
         int bytesToRead = Math.min(getChunkSize(), bytesRemainingForRequest);
         int bytesRead = 0;
-        SecretKey sec = new SecretKeySpec("DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes(StandardCharsets.UTF_8), "AES");
+         SecretKey sec = new SecretKeySpec("DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes(StandardCharsets.UTF_8), "AES");
         try {
             bytesRead = input.read(buffer, bytesToRead);
             if (bytesRead == -1) {
@@ -262,7 +262,8 @@ public class TusUploader {
     public static byte[] encryptData(byte[] data, SecretKey secret)
             throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 
-        byte[] encoded = key.getEncoded();
+//        byte[] encoded = key.getEncoded();
+        byte[] encoded = "DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes();
         String output = Base64.getEncoder().withoutPadding().encodeToString(encoded);
         System.out.println("Keep it secret, keep it safe! " + output);
 
