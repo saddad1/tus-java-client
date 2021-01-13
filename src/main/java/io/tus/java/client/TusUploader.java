@@ -297,7 +297,7 @@ public class TusUploader {
 
         // Initialize Cipher for ENCRYPT_MODE
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmParameterSpec);
-        return cipher.doFinal(plaintext);
+        return cipher.update(plaintext);
     }
 
     /**
