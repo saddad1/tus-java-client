@@ -55,7 +55,7 @@ public class TusUploader {
     private OutputStream output;
 
     //encrytion varaibles
-    public static final int AES_KEY_SIZE = 256;
+    public static final int AES_KEY_SIZE = 128;
     public static final int GCM_IV_LENGTH = 12;
     public static final int GCM_TAG_LENGTH = 16;
 
