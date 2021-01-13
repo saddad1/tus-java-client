@@ -287,7 +287,7 @@ public class TusUploader {
 
     public static byte[] encrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception {
         // Get Cipher Instance
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
 
         // Create SecretKeySpec
         SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
