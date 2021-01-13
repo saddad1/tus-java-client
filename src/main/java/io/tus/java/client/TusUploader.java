@@ -231,8 +231,9 @@ public class TusUploader {
             // Do not write the entire buffer to the stream since the array will
             // be filled up with 0x00s if the number of read bytes is lower then
             // the chunk's size.
+            byte[] originalChunk = Arrays.copyOfRange(buffer, 0, bytesRead);
 
-            byte[] encryptedBuffer = encryptData(buffer, sec);
+            byte[] encryptedBuffer = encryptData(originalChunk, sec);
             output.write(encryptedBuffer, 0, encryptedBuffer.length);
             output.flush();
 
