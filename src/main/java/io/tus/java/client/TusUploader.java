@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -59,8 +60,9 @@ public class TusUploader {
     public static final int GCM_TAG_LENGTH = 16;
 
     private static SecretKey key;
-    private static final byte[] IV =new byte[GCM_IV_LENGTH];
+    private static final byte[] IV = new byte[GCM_IV_LENGTH];
     KeyGenerator keyGenerator = null;
+
     /**
      * Begin a new upload request by opening a PATCH request to specified upload URL. After this
      * method returns a connection will be ready and you can upload chunks of the file.
@@ -231,7 +233,7 @@ public class TusUploader {
             // the chunk's size.
 
             byte[] encryptedBuffer = encryptData(buffer, sec);
-            output.write(encryptedBuffer, 0, bytesRead);
+            output.write(encryptedBuffer, 0, encryptedBuffer.length);
             output.flush();
 
             offset += bytesRead;
@@ -293,7 +295,6 @@ public class TusUploader {
 
         // Initialize Cipher for ENCRYPT_MODE
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmParameterSpec);
-
         return cipher.doFinal(plaintext);
     }
 
