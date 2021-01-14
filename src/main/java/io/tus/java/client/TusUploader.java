@@ -275,7 +275,7 @@ public class TusUploader {
         byte[] decrytedText = new byte[0];
         try {
             cipherText = encrypt(data, key, IV);
-            decrytedText = decrypt(cipherText, key, IV);
+//            decrytedText = decrypt(cipherText, key, IV);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -285,7 +285,7 @@ public class TusUploader {
         System.out.println("Encrypted Text : " + Base64.getEncoder().encodeToString(cipherText));
         System.out.println("Decrypted Text : " + Base64.getEncoder().encodeToString(decrytedText));
         System.out.println("Tag Text : " + Base64.getEncoder().encodeToString(tagVal));
-        return decrytedText;
+        return cipherText;
     }
 
     public static byte[] encrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception {
