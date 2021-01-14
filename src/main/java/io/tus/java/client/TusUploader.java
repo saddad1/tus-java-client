@@ -295,11 +295,10 @@ public class TusUploader {
         // Create SecretKeySpec
         SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
 
-        // Create GCMParameterSpec
-        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, IV);
+        IvParameterSpec iv = new IvParameterSpec(IV);
 
         // Initialize Cipher for ENCRYPT_MODE
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmParameterSpec);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, iv);
         return cipher.update(plaintext);
     }
 
@@ -310,11 +309,10 @@ public class TusUploader {
         // Create SecretKeySpec
         SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
 
-        // Create GCMParameterSpec
-        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, IV);
+        IvParameterSpec iv = new IvParameterSpec(IV);
 
         // Initialize Cipher for ENCRYPT_MODE
-        cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmParameterSpec);
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, iv);
         return cipher.update(plaintext);
     }
     /**
