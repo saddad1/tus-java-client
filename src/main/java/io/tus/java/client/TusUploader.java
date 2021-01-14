@@ -275,7 +275,7 @@ public class TusUploader {
         byte[] decrytedText = new byte[0];
         try {
             cipherText = encrypt(data, key, IV);
-            decrytedText = decrypt(data, key, IV);
+            decrytedText = decrypt(cipherText, key, IV);
         } catch (Exception e) {
             e.printStackTrace();
         }
