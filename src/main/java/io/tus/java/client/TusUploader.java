@@ -65,7 +65,7 @@ public class TusUploader {
     private static String key = "RE8wcS4wMnBATlpnVGIzMjFrVnhqMiwuNUMkLGRCWXo=";
 //    private static final byte[] IV = "1234567890123456".getBytes();
 //    private static final String IV = "MTIzNDU2Nzg5MDEyMzQ1Ng==";
-    private static final String IV = "MDEyMzQ1Njc4OTAxCg==";
+    private static final String IV = "MTIzNDU2Nzg5MTIz";
     KeyGenerator keyGenerator = null;
 
     /**
