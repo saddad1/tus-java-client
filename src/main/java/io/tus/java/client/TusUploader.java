@@ -272,8 +272,10 @@ public class TusUploader {
         System.out.println("Keep ivoutput secret, keep it safe! " + ivoutput);
 
         byte[] cipherText = new byte[0];
+        byte[] decrytedText = new byte[0];
         try {
             cipherText = encrypt(data, key, IV);
+            decrytedText = decrypt(data, key, IV);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -281,8 +283,9 @@ public class TusUploader {
         byte[] tagVal = Arrays.copyOfRange(cipherText, cipherText.length - (128 / Byte.SIZE), cipherText.length);
 
         System.out.println("Encrypted Text : " + Base64.getEncoder().encodeToString(cipherText));
+        System.out.println("Decrypted Text : " + Base64.getEncoder().encodeToString(decrytedText));
         System.out.println("Tag Text : " + Base64.getEncoder().encodeToString(tagVal));
-        return cipherText;
+        return decrytedText;
     }
 
     public static byte[] encrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception {
@@ -300,6 +303,20 @@ public class TusUploader {
         return cipher.update(plaintext);
     }
 
+    public static byte[] decrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception {
+        // Get Cipher Instance
+        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
+
+        // Create SecretKeySpec
+        SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
+
+        // Create GCMParameterSpec
+        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, IV);
+
+        // Initialize Cipher for ENCRYPT_MODE
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmParameterSpec);
+        return cipher.update(plaintext);
+    }
     /**
      * Upload a part of the file by read a chunks specified size from the InputStream and writing
      * it to the HTTP request's body. If the number of available bytes is lower than the chunk's
