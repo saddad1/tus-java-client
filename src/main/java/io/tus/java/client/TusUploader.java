@@ -59,11 +59,13 @@ public class TusUploader {
     public static final int AES_KEY_SIZE = 256;
     public static final int GCM_IV_LENGTH = 12;
     public static final int GCM_TAG_LENGTH = 16;
-    public static final String ALGO = "AES/CTR/NoPadding";
+//    public static final String ALGO = "AES/CTR/NoPadding";
+    public static final String ALGO = "AES_256/GCM/NoPadding";
 
     private static String key = "RE8wcS4wMnBATlpnVGIzMjFrVnhqMiwuNUMkLGRCWXo=";
 //    private static final byte[] IV = "1234567890123456".getBytes();
-    private static final String IV = "MTIzNDU2Nzg5MDEyMzQ1Ng==";
+//    private static final String IV = "MTIzNDU2Nzg5MDEyMzQ1Ng==";
+    private static final String IV = "MDEyMzQ1Njc4OTAxCg==";
     KeyGenerator keyGenerator = null;
 
     /**
