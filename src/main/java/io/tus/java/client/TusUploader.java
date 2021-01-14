@@ -61,8 +61,9 @@ public class TusUploader {
     public static final int GCM_TAG_LENGTH = 16;
     public static final String ALGO = "AES/CTR/NoPadding";
 
-    private static String key = "DO0q.02p@NZgTb321kVxj2,.5C$,dBYz";
-    private static final byte[] IV = "1234567890123456".getBytes();
+    private static String key = "RE8wcS4wMnBATlpnVGIzMjFrVnhqMiwuNUMkLGRCWXo=";
+//    private static final byte[] IV = "1234567890123456".getBytes();
+    private static final String IV = "MTIzNDU2Nzg5MDEyMzQ1Ng==";
     KeyGenerator keyGenerator = null;
 
     /**
@@ -262,12 +263,12 @@ public class TusUploader {
             throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 
 //        byte[] encoded = key.getEncoded();
-        byte[] encoded = "DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes();
-        String output = Base64.getEncoder().withoutPadding().encodeToString(encoded);
-        System.out.println("Keep it secret, keep it safe! " + output);
+//        byte[] encoded = "DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes();
+//        String output = Base64.getEncoder().withoutPadding().encodeToString(encoded);
+//        System.out.println("Keep it secret, keep it safe! " + output);
 
-        String ivoutput = Base64.getEncoder().withoutPadding().encodeToString(IV);
-        System.out.println("Keep ivoutput secret, keep it safe! " + ivoutput);
+//        String ivoutput = Base64.getEncoder().withoutPadding().encodeToString(IV);
+//        System.out.println("Keep ivoutput secret, keep it safe! " + ivoutput);
 
         byte[] cipherText = new byte[0];
         byte[] decrytedText = new byte[0];
@@ -290,7 +291,8 @@ public class TusUploader {
     public static byte[] encrypt(byte[] Data, String secret) throws Exception {
         Key key = generateKey(secret);
         Cipher c = Cipher.getInstance(ALGO);
-        c.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(IV));
+        IvParameterSpec iv = generateIV(IV);
+        c.init(Cipher.ENCRYPT_MODE, key, iv);
         byte[] encVal = c.doFinal(Data);
         String encryptedValue = Base64.getEncoder().encodeToString(encVal);
         return encryptedValue.getBytes();
@@ -300,6 +302,12 @@ public class TusUploader {
         byte[] decoded = Base64.getDecoder().decode(secret.getBytes());
         Key key = new SecretKeySpec(decoded, ALGO);
         return key;
+    }
+
+    private static IvParameterSpec generateIV(String iv) throws Exception {
+        byte[] decodedIV = Base64.getDecoder().decode(iv.getBytes());
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(decodedIV);
+        return ivParameterSpec;
     }
 
 //    public static byte[] encrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception {
