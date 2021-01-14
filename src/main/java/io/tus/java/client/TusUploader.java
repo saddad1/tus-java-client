@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidParameterSpecException;
@@ -58,8 +59,9 @@ public class TusUploader {
     public static final int AES_KEY_SIZE = 256;
     public static final int GCM_IV_LENGTH = 12;
     public static final int GCM_TAG_LENGTH = 16;
+    public static final String ALGO = "AES/CTR/NoPadding";
 
-    private static SecretKey key;
+    private static String key = "DO0q.02p@NZgTb321kVxj2,.5C$,dBYz";
     private static final byte[] IV = "1234567890123456".getBytes();
     KeyGenerator keyGenerator = null;
 
@@ -98,9 +100,6 @@ public class TusUploader {
             e.printStackTrace();
         }
         keyGenerator.init(AES_KEY_SIZE);
-
-        // Generate Key
-        key = keyGenerator.generateKey();
 
 //        SecureRandom random = new SecureRandom();
 //        random.nextBytes(IV);
@@ -221,7 +220,6 @@ public class TusUploader {
 
         int bytesToRead = Math.min(getChunkSize(), bytesRemainingForRequest);
         int bytesRead = 0;
-         SecretKey sec = new SecretKeySpec("DO0q.02p@NZgTb321kVxj2,.5C$,dBYz".getBytes(StandardCharsets.UTF_8), "AES");
         try {
             bytesRead = input.read(buffer, bytesToRead);
             if (bytesRead == -1) {
@@ -233,7 +231,7 @@ public class TusUploader {
             // the chunk's size.
             byte[] originalChunk = Arrays.copyOfRange(buffer, 0, bytesRead);
 
-            byte[] encryptedBuffer = encryptData(originalChunk, sec);
+            byte[] encryptedBuffer = encryptData(originalChunk, key);
             output.write(encryptedBuffer, 0, encryptedBuffer.length);
             output.flush();
 
@@ -260,7 +258,7 @@ public class TusUploader {
     /*
      * Encrypt Chuck
      */
-    public static byte[] encryptData(byte[] data, SecretKey secret)
+    public static byte[] encryptData(byte[] data, String key)
             throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 
 //        byte[] encoded = key.getEncoded();
@@ -274,7 +272,8 @@ public class TusUploader {
         byte[] cipherText = new byte[0];
         byte[] decrytedText = new byte[0];
         try {
-            cipherText = encrypt(data, key, IV);
+            cipherText = encrypt(data, key);
+//            cipherText = encrypt(data, key, IV);
 //            decrytedText = decrypt(cipherText, key, IV);
         } catch (Exception e) {
             e.printStackTrace();
@@ -288,19 +287,34 @@ public class TusUploader {
         return cipherText;
     }
 
-    public static byte[] encrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception {
-        // Get Cipher Instance
-        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
-
-        // Create SecretKeySpec
-        SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
-
-        IvParameterSpec iv = new IvParameterSpec(IV);
-
-        // Initialize Cipher for ENCRYPT_MODE
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec, iv);
-        return cipher.update(plaintext);
+    public static byte[] encrypt(byte[] Data, String secret) throws Exception {
+        Key key = generateKey(secret);
+        Cipher c = Cipher.getInstance(ALGO);
+        c.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(IV));
+        byte[] encVal = c.doFinal(Data);
+        String encryptedValue = Base64.getEncoder().encodeToString(encVal);
+        return encryptedValue.getBytes();
     }
+
+    private static Key generateKey(String secret) throws Exception {
+        byte[] decoded = Base64.getDecoder().decode(secret.getBytes());
+        Key key = new SecretKeySpec(decoded, ALGO);
+        return key;
+    }
+
+//    public static byte[] encrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception {
+//        // Get Cipher Instance
+//        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
+//
+//        // Create SecretKeySpec
+//        SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
+//
+//        IvParameterSpec iv = new IvParameterSpec(IV);
+//
+//        // Initialize Cipher for ENCRYPT_MODE
+//        cipher.init(Cipher.ENCRYPT_MODE, keySpec, iv);
+//        return cipher.update(plaintext);
+//    }
 
     public static byte[] decrypt(byte[] plaintext, SecretKey key, byte[] IV) throws Exception {
         // Get Cipher Instance
@@ -315,6 +329,7 @@ public class TusUploader {
         cipher.init(Cipher.DECRYPT_MODE, keySpec, iv);
         return cipher.update(plaintext);
     }
+
     /**
      * Upload a part of the file by read a chunks specified size from the InputStream and writing
      * it to the HTTP request's body. If the number of available bytes is lower than the chunk's
