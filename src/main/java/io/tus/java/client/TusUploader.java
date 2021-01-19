@@ -295,7 +295,8 @@ public class TusUploader {
         c.init(Cipher.ENCRYPT_MODE, key, iv);
         byte[] encVal = c.doFinal(Data);
         String encryptedValue = Base64.getEncoder().encodeToString(encVal);
-        return encryptedValue.getBytes();
+        return encVal;
+//        return encryptedValue.getBytes();
     }
 
     private static Key generateKey(String secret) throws Exception {
